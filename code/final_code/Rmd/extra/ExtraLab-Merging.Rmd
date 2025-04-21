@@ -1,0 +1,81 @@
+---
+title: 'Extra Lab: Merging Data'
+output:
+  pdf_document: default
+  html_document: default
+---
+
+## Part 1
+
+Read in the data and use functions of your choice to preview it.
+
+```{r, message = FALSE}
+library(tidyverse)
+
+crash <- read_csv("https://sisbid.github.io/Data-Wrangling/labs/crashes.csv")
+road <- read_csv("https://sisbid.github.io/Data-Wrangling/labs/roads.csv")
+```
+
+1. Join data to retain only complete data, (using an inner join) e.g. those observations with road lengths and districts.  Merge without using `by` argument, then merge using `by = "Road"`. call the output `merged.`  How many observations are there?
+
+```{r}
+# Step 1: Inner Join (without specifying by)
+merged1 <- inner_join(crash, road)  # matches on all common columns automatically
+nrow(merged1)
+# Step 2: Inner Join (specifying key column explicitly)
+merged <- inner_join(crash, road, by = "Road")  # safer and more explicit
+nrow(merged)
+# 88 observations are there
+```
+
+2. Join data using a `full_join.`  Call the output `full.`   How many observations are there?
+
+```{r}
+full <- full_join(crash, road, by = "Road")
+nrow(full)
+# 111 observations are there
+```
+
+3. Do a left join of the `road` and `crash`.  ORDER matters here!  How many observations are there?
+
+```{r}
+# keep all roads, and attach crash info if available
+left_join(road, crash, by = "Road")
+left <- left_join(road, crash, by = "Road")
+nrow(left)
+# 89 observations are there
+```
+
+4. Repeat above with a `right_join` with the same order of the arguments. How many observations are there?
+
+```{r}
+right <- right_join(road, crash, by = "Road")
+nrow(right)
+# 110 observations are there
+```
+
+## **Bonus Practice**
+
+5. Which highways do not have road data? Do this in a "tidy" format. Summarize by the total count of `N_Crashes` per highway. Hint: Use `anti_join()` and `group_by()`.
+
+```{r}
+crash %>%
+  anti_join(road, by = "Road") %>%        # only crashes with no matching road info
+  group_by(Road) %>%                      # group by highway name
+  summarize(total_crashes = sum(N_Crashes, na.rm = TRUE)) %>%
+  arrange(desc(total_crashes))
+# Rod is interstate 275 with 549 total crashes
+```
+
+6. You have an intern who has been pouring over the raw data and found a few mistakes in the `N_Crashes` column of the `crash` dataset. They have made a spreadsheet for you containing only the corrected entries. Modify the original tibble with the following:
+- A column (`Corrected`) indicating if a particular entry has a corresponding correction in `corrections`.
+- If the row has a correction, take the corrected value
+- Keep the original columns (Year, Road, N_Crashes, Volume) plus the column indicating whether the data is corrected or not (`Corrected`).
+
+*hint: take a look at the two datasets - are you sure they're joining correctly?*
+
+```{r}
+corrections <- read_csv("https://sisbid.github.io/Data-Wrangling/labs/crashes_corrections.csv")
+
+# They are not joining correctly. roblem with `Year` and `Road`
+```

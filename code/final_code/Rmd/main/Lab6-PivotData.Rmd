@@ -1,0 +1,85 @@
+---
+title: "Lab: Reshaping Data"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(tidyverse)
+```
+
+1.  Read in the public transportation data from Baltimore: Circulator Data, from `data/Charm_City_Circulator_Ridership.csv`\
+    Name the data set `wide`.
+
+```{r, message = FALSE}
+wide <- read_csv("C:/Users/14699/Desktop/UTSWMC/School_of_Health_Professions/Department_of_Health_Informatics/MSHI/My_Spring_2025_Courses/HI5305/Homeworks_Assignments/Dr_Andrew/cloud/RProject/data/raw_data/Charm_City_Circulator_Ridership.csv")
+```
+
+2.  Reshape to long format using `pivot_longer`. Call this data `long.` Make the `names_to =` `name`, and the values `n_people` Make sure we gather all columns **but** `daily`, `day`, `date`, using the `!`.
+
+```{r}
+# Reshape to long format
+long <- wide %>%
+  pivot_longer(
+    cols = !c(daily, day, date),      # all columns EXCEPT daily, day, date
+    names_to = "name",                # name of the column for original column names
+    values_to = "n_people"            # name of the column for the values
+  )
+
+# View the first few rows
+head(long)
+```
+
+3.  Separate the `date` column into ("month", "day", "year") using `separate()` and `sep = "/"`. Make sure you don't remove the `date` column, call this `long2`. Do a table of the day column. Where did the original `day` column go?
+
+```{r}
+long2 <- wide
+
+# Separate the 'date' column
+long2 <- long2 %>%
+  separate(date, into = c("month", "day", "year"), sep = "/", remove = FALSE)
+
+# Create a frequency table of the 'day' column
+day_counts <- table(long2$day)
+print(day_counts)
+
+# Check the columns in long2
+print(colnames(long2))
+# The original `day` column is overwritten in long2 by the newly created 'day' column from the separate() function. The original 'day' column still exists in the original dataset. As for the original day column (e.g., "Monday", "Tuesday"), it is still present in long2 and was not affected by the split. We simply created a new column day_from_date from the date, without altering or removing the existing day.
+```
+
+4.  Notice, there are three types of actions capture per color line: `Board`, `Alight`, and `Average`. Let's run the following create separate columns for route and type. Fill in the missing inputs (where `XXXX` is) to complete the command. Also, notice you can combine multiple mutates in a single mutate call!
+
+```{r, error = TRUE}
+long3 <- long %>%
+  mutate(
+    name = str_replace(name, "Board", "_Board"),
+    name = str_replace(name, "Alight", "_Alight"),
+    name = str_replace(name, "Average", "_Average")
+  ) %>%
+  separate(name, into = c("route", "type"), sep = "_")
+head(long3)
+```
+
+5.  Reshape `long3` using `pivot_wider()`. Spread the data out so the `route` becomes the new column names and the cells are filled with the `n_people` value. Call this `wide_by_route`.
+
+```{r}
+wide_by_route <- long3 %>%
+  pivot_wider(
+    names_from = route,
+    values_from = n_people
+  )
+head(wide_by_route)
+```
+
+6.  Reshape `long3` using `pivot_wider()`. Spread the data out so the `day` becomes the new column names and the cells are filled with the `n_people` value. Call this `wide_by_day`.
+
+```{r}
+wide_by_day <- long3 %>%
+  pivot_wider(
+    names_from = day,
+    values_from = n_people
+  )
+head(wide_by_day)
+```

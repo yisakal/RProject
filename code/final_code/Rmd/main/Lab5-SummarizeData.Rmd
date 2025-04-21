@@ -1,0 +1,91 @@
+---
+title: "Lab: Summarizing Data"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+This lab uses public transport data from Baltimore, used in Lab2. The .csv file is located in `data/Charm_City_Circulator_Ridership.csv`
+
+```{r read_in_data}
+library(tidyverse)
+```
+
+1.  How many days worth of data are in the data set? You can assume each observation/row is a different day
+
+```{r q1}
+# Load the CSV file
+data <- read.csv("C:/Users/14699/Desktop/UTSWMC/School_of_Health_Professions/Department_of_Health_Informatics/MSHI/My_Spring_2025_Courses/HI5305/Homeworks_Assignments/Dr_Andrew/cloud/RProject/data/raw_data/Charm_City_Circulator_Ridership.csv")
+
+# Count the number of rows (i.e., days)
+num_days <- nrow(data)
+
+# Print the result
+cat("Number of days in the dataset:", num_days, "\n")
+
+# The dataset contains 1,146 days worth of data (1146L).
+```
+
+2.  What is the total (sum) number of boardings on the green bus (`greenBoardings`)?
+
+```{r q2}
+# Calculate the total number of green boardings
+total_green_boardings <- sum(data$greenBoardings, na.rm = TRUE)
+
+# Print the result
+cat("Total green bus boardings:", total_green_boardings, "\n")
+# Total green bus boardings: 935564L
+```
+
+3.  How many days are missing daily ridership? Use `is.na()` and `sum()`.
+
+```{r q3}
+# Count how many days have missing daily ridership
+missing_daily_count <- sum(is.na(data$daily))
+
+# Print the result
+cat("Number of days with missing daily ridership:", missing_daily_count, "\n")
+# Number of days with missing daily ridership: 124 
+```
+
+4.  Group the data by day of the week (`day`) and calculate the sum for riders.
+
+```{r q4}
+# Group by day of the week and calculate total ridership
+ridership_by_day <- data %>%
+  group_by(day) %>%
+  summarise(total_riders = sum(daily, na.rm = TRUE))
+
+# Print the result
+print(ridership_by_day)
+```
+
+## **Extra practice:**
+
+5.  Describe the distribution of `orangeBoardings`(use `quantile()`). The `quantile()` function works like `mean()`, `sum()`, etc.
+
+```{r q5}
+# Get quantiles for orangeBoardings
+orange_quantiles <- quantile(data$orangeBoardings, na.rm = TRUE)
+
+# Print the result
+print(orange_quantiles)
+```
+
+6.  Describe the distribution of `orangeBoardings`(use `quantile()`), but this time stratify by day of the week.
+
+```{r q6}
+# Calculate quantiles stratified by day of the week
+orange_quantiles_by_day <- data %>%
+  group_by(day) %>%
+  summarise(
+    q0   = quantile(orangeBoardings, 0, na.rm = TRUE),
+    q25  = quantile(orangeBoardings, 0.25, na.rm = TRUE),
+    q50  = quantile(orangeBoardings, 0.50, na.rm = TRUE),
+    q75  = quantile(orangeBoardings, 0.75, na.rm = TRUE),
+    q100 = quantile(orangeBoardings, 1, na.rm = TRUE)
+  )
+
+# Print the result
+print(orange_quantiles_by_day)
+```

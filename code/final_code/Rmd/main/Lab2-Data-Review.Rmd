@@ -1,0 +1,58 @@
+---
+title: "Lab: Reviewing Imported Data"
+output: html_document
+# Adapted from Carrie Wright and Ava Hoffman
+---
+
+Prompt: Read in the data sets and explore using various tools. Note, you may need to install the suggested tool packages first.
+
+
+```{r, message = FALSE}
+library(dplyr)
+library(tidyverse)
+library(naniar)
+library(visdat)
+```
+
+
+1. Read in the the Charm City Circulator Dataset from `data/Charm_City_Circulator_Ridership.csv` using `read_csv`, call it `circ`
+```{r}
+Circ <- read_csv("C:/Users/14699/Desktop/UTSWMC/School_of_Health_Professions/Department_of_Health_Informatics/MSHI/My_Spring_2025_Courses/HI5305/Homeworks_Assignments/Dr_Andrew/cloud/RProject/data/raw_data/Charm_City_Circulator_Ridership.csv")
+```
+
+2. Print the number of rows of `circ`
+```{r}
+nrow(Circ)
+```
+
+3. Visualize the missing data patterns of `circ` with `vis_miss`:
+```{r}
+install.packages("visdat")
+library(visdat)
+vis_miss(Circ)
+```
+
+4. Determine the percent missing in each column using `miss_var_summary`
+
+```{r}
+install.packages("naniar")
+library(naniar)
+miss_var_summary(Circ)
+```
+
+5. Determine the number missing in each column using `gg_miss_var`:
+```{r}
+# Visualize the number of missing values in each column
+gg_miss_var(Circ)
+```
+
+6. Write out `circ` to a file called "Circulator.csv" using `write_csv`:
+```{r}
+write_csv(Circ, "Circulator.csv")
+```
+
+7. Write out `circ` to a file called "Circulator.rds" using `write_rds`:
+
+```{r}
+write_rds(Circ, "Circulator.rds")
+```

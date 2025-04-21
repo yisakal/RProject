@@ -1,0 +1,342 @@
+---
+title: 'HW 1: Cleaning UFO Data'
+output: html_document
+---
+
+In this lab you will have more fun with the (messy) UFO sighting data set.
+
+# Cleaning UFO Sightings!
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(lubridate)
+library(ggplot2)
+```
+
+##1.  Read in the UFO dataset as an R object called `ufo`. You can read it from: `data/ufo/ufo_data_complete.csv` . You can ignore the "problems" with some rows.
+
+```{r}
+ufo <- read_csv("C:/Users/14699/Desktop/UTSWMC/School_of_Health_Professions/Department_of_Health_Informatics/MSHI/My_Spring_2025_Courses/HI5305/Homeworks_Assignments/Dr_Andrew/cloud/RProject/data/raw_data/ufo_data_complete.csv")
+```
+
+### Stringr Exercises
+
+##2.  Clean up the column/variable names of the `ufo` dataset to remove spaces and non-alphanumeric characters. You can use the `dplyr::rename()` function or look into the `janitor::clean_names()` function. (Remember you may need to install janitor in addition to tidyverse.)
+
+```{r}
+ufo <- ufo %>%
+  clean_names()
+head(ufo)
+```
+
+##3.  How many UFO sightings were reported on a time scale of minutes, specifically using the `duration (hours/min)` originally-named column? (hint: explore the various entries in this column and then use a `stringr` function to match a flexible pattern. you can ignore observations like "1/2 hour" and similar ones that don't contain some version of the word "minutes")
+
+```{r}
+sum(str_detect(ufo$duration_hours_min, regex("minute", ignore_case = TRUE)), na.rm = TRUE)
+```
+
+##4.  How accurate is the (formerly-named) `duration (seconds)` column? I.e. how many of the above minutes-scale observations have durations less than 120 seconds or greater than 3800 seconds?
+
+```{r}
+# Less than 2 minutes seems too short and more than ~63 minutes (3800 sec) seems too long for something described in minutes
+# Filter rows that mention "minutes" in the duration text
+ufo_minutes <- ufo %>%
+  filter(str_detect(duration_hours_min, regex("min(ute)?s?", ignore_case = TRUE)))
+# Now check how many of these have suspicious duration_seconds
+ufo_minutes_inaccurate <- ufo_minutes %>%
+  filter(duration_seconds < 120 | duration_seconds > 3800)
+
+# Count them
+n_inaccurate <- nrow(ufo_minutes_inaccurate)
+n_total_minutes <- nrow(ufo_minutes)
+
+accuracy_info <- tibble(
+  total_minutes = n_total_minutes,
+  inaccurate_minutes = n_inaccurate,
+  percent_inaccurate = round(n_inaccurate / n_total_minutes * 100, 2)
+)
+
+accuracy_info
+head(accuracy_info)
+# total_minutes = 50112
+# inaccurate_minutes = 6040
+# percent_inaccurate = 12.05
+```
+
+##5.  How many ufo sighting cities end in (a) "field", (b) "ton" and (c) "port"? Hint: See regular expressions to help feed your stringr functions (aka regex)
+
+```{r}
+# Clean city names to ensure consistency (e.g., lowercase, trimmed)
+ufo <- ufo %>%
+  mutate(city = str_trim(str_to_lower(city)))
+
+# (a) Cities ending in "field"
+field_cities <- ufo %>%
+  filter(str_detect(city, "field$")) %>%
+  distinct(city)
+
+# (b) Cities ending in "ton"
+ton_cities <- ufo %>%
+  filter(str_detect(city, "ton$")) %>%
+  distinct(city)
+
+# (c) Cities ending in "port"
+port_cities <- ufo %>%
+  filter(str_detect(city, "port$")) %>%
+  distinct(city)
+
+# Output the counts
+tibble(
+  ends_in_field = nrow(field_cities),
+  ends_in_ton = nrow(ton_cities),
+  ends_in_port = nrow(port_cities)
+)
+#a. "field$" = 107 strings that end with "field"
+#b. "ton$" = 494 strings that end with "ton"
+#c. "port$" = 86 strings that end with "port"
+# $ is the regex anchor for the end of a string
+```
+
+##6.  How many ufo sighting comments reference the "greys" ?
+
+```{r}
+# Filter comments that mention "greys"
+greys_mentions <- ufo %>%
+  filter(str_detect(comments, regex("\\bgreys\\b", ignore_case = TRUE)))
+
+# Count the number of matches
+n_greys <- nrow(greys_mentions)
+n_greys
+# Three ufo sighting comments reference the "greys"
+```
+
+##7. Which cities did these occur in?
+
+```{r}
+greys_cities <- ufo %>%
+  filter(str_detect(comments, regex("\\bgreys\\b", ignore_case = TRUE))) %>%
+  distinct(city) %>%
+  arrange(city)
+
+greys_cities
+# arkadelphia, ferndale, and gainesville
+```
+
+### Practice with lubridate
+
+##8. How many encounters occurred in the year 2010? This question might be tricky to answer until we convert our table columns into something more workable. What would make the `datetime` column format more useful? 
+Create a new column that converts the `datetime` column into a lubridate `<date>` format. Then answer the question.  Call this new column `date_enc`.
+
+
+```{r}
+# Convert datetime to a date format
+ufo <- ufo %>%
+  mutate(date_enc = mdy_hm(datetime))  # use mdy_hms() if there's seconds too
+
+# Filter for 2010
+encounters_2010 <- ufo %>%
+  filter(year(date_enc) == 2010)
+
+# Count them
+n_2010 <- nrow(encounters_2010)
+n_2010
+# 4695 encounters occurred in the year 2010
+```
+
+
+##9a. Convert the other "date/time" column `date_posted` to a lubridate formate also. Call this column `date_posted2`
+Hint/note: may need to use "quiet = TRUE" for some of your lubridate conversions to avoid errors.
+
+```{r}
+# convert the date_posted column into a lubridate-compatible date format and store it in a new column called date_posted2,
+ufo <- ufo %>%
+  mutate(date_posted2 = mdy(date_posted, quiet = TRUE))
+```
+
+##9b. Create new separate columns for `year`, `month`, `day`, and `hour`, based on the `date_enc`.
+Hint/note: may need to use "quiet = TRUE" for some of your lubridate conversions to avoid errors.
+
+```{r}
+# extract the year, month, day, and hour columns from `date_enc` using lubridate functions
+ufo <- ufo %>%
+  mutate(
+    year = year(date_enc),
+    month = month(date_enc),
+    day = day(date_enc),
+    hour = hour(date_enc)
+  )
+```
+
+##(extra credit) 10. Let's take a look at the time it took for these alleged encounters to be reported. Compare the encounter date/time to the posted date.  What is the mean durations between the two?
+Hint: maybe take a look here: https://lubridate.tidyverse.org/reference/time_length.html 
+
+```{r}
+# measure the delay between when a UFO sighting occurred (date_enc) and when it was posted (date_posted2)
+# Convert both to the same class before subtracting. Since the date_posted2 only has the date anyway, it’s easiest to convert date_enc to Date
+# length in months or years is represented by their most common lengths in seconds
+ufo <- ufo %>%
+  mutate(
+    report_delay = as.numeric(date_posted2 - as.Date(date_enc), units = "days")
+  )
+
+# Get the mean delay
+mean_delay_days <- mean(ufo$report_delay, na.rm = TRUE)
+mean_delay_days
+# the mean durations between the two = 1212.723 seconds
+```
+
+##11.  Can you generate a count summary over the years for the encounters? And over the years posted? (using the counts() function)
+
+```{r}
+# Count of encounters by year (when it occurred)
+encounter_counts <- ufo %>%
+  count(year, name = "n_encounters") %>%
+  arrange(year)
+
+# Count of posts by year (when it was posted)
+post_counts <- ufo %>%
+  mutate(post_year = year(date_posted2)) %>%
+  count(post_year, name = "n_posts") %>%
+  arrange(post_year)
+
+# View both
+encounter_counts
+post_counts
+```
+
+##(extra credit) 12. Can you plot in a barplot of the encounter counts ?
+Hint: You might need to remove NAs
+```{r}
+# Barplot of encounters per year (excluding NAs)
+ufo %>%
+  filter(!is.na(year)) %>%
+  count(year, name = "n_encounters") %>%
+  ggplot(aes(x = year, y = n_encounters)) +
+  geom_col(fill = "steelblue") +
+  labs(
+    title = "UFO Encounters by Year",
+    x = "Year",
+    y = "Number of Encounters"
+  ) +
+  theme_minimal()
+```
+
+### Plotting Review Fun
+
+##13.  Can you make a scatter plot of all encounters after 2013 occurring in the us?
+
+```{r}
+# Filter and plot encounters after 2013 in the U.S.
+# plot them by longitude and latitude. Reduces visual clutter with blank axes and light styling. use geom_point(alpha = 0.3, size = 1) to keep it light and readable
+ufo %>%
+  filter(country == "us", year > 2013) %>%
+  ggplot(aes(x = longitude, y = latitude)) +
+  geom_point(alpha = 0.3, size = 1, color = "purple") +
+  labs(
+    title = "U.S. UFO Encounters After 2013",
+    x = NULL,
+    y = NULL
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_blank(),  # remove x-axis text
+    axis.ticks.x = element_blank(), # remove x-axis ticks
+    axis.text.y = element_blank(),  # remove y-axis text
+    axis.ticks.y = element_blank()  # remove y-axis ticks
+  )
+```
+
+### Practice with Forcats
+
+<https://forcats.tidyverse.org/>
+
+##14. What are the most common `shapes` of ufos for the `state` of Texas?  (first try with counts())
+```{r}
+library(forcats)
+
+# Count shapes in Texas
+ufo %>%
+  filter(state == "tx") %>%
+  count(shape, sort = TRUE)
+# for plotting these shapes or further analsis, we can reorder them:
+ufo %>%
+  filter(state == "tx") %>%
+  mutate(shape = fct_infreq(shape)) %>%
+  count(shape)
+```
+
+##15. Can you make barplot displaying this information? (this time using forcats)
+
+```{r}
+ufo %>%
+  filter(state == "tx") %>%
+  mutate(shape = fct_infreq(shape)) %>%  # reorder shapes by frequency
+  count(shape) %>%
+  ggplot(aes(x = shape, y = n)) +
+  geom_col(fill = "darkorange") +
+  labs(
+    title = "Most Common UFO Shapes in Texas",
+    x = "UFO Shape",
+    y = "Number of Sightings"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+##16. Can you make the barplot ordered by counts?
+
+```{r}
+#To make sure the barplot is ordered by counts, apply fct_infreq() inside the aes() call (or relevel the factor before plotting)
+ufo %>%
+  filter(state == "tx") %>%
+  count(shape) %>%
+  mutate(shape = fct_reorder(shape, n)) %>%  # reorder shapes by count
+  ggplot(aes(x = shape, y = n)) +
+  geom_col(fill = "steelblue") +
+  labs(
+    title = "Most Common UFO Shapes in Texas",
+    x = "UFO Shape",
+    y = "Number of Sightings"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+##17. This might display too many items for a concise plot. Can you reduce the count categories and replot?
+
+```{r}
+# To reduce the count categories, like n = 6, and simplify the barplot, use forcats::fct_lump() to group less common shapes into an "Other" category — then replot
+ufo %>%
+  filter(state == "tx") %>%
+  mutate(shape = fct_lump(shape, n = 6)) %>%  # keep top 6 shapes, lump rest into "Other"
+  count(shape) %>%
+  mutate(shape = fct_reorder(shape, n)) %>%
+  ggplot(aes(x = shape, y = n)) +
+  geom_col(fill = "darkgreen") +
+  labs(
+    title = "Most Common UFO Shapes in Texas (Top 6 + Other)",
+    x = "UFO Shape",
+    y = "Number of Sightings"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+##18. What was the most common shape for Texas?  How about Texas in the year 2010?
+
+```{r}
+# To find the most common UFO shape in Texas overall, and then specifically in Texas during the year 2010, use filter() + count() + slice_max()
+# Overall most common shape in Texas
+ufo %>%
+  filter(state == "tx", !is.na(shape)) %>%
+  count(shape, sort = TRUE) %>%
+  slice_max(n, n = 1)
+# Most common shape in Texas in 2010
+ufo %>%
+  filter(state == "tx", year == 2010, !is.na(shape)) %>%
+  count(shape, sort = TRUE) %>%
+  slice_max(n, n = 1)
+```
+

@@ -1,0 +1,57 @@
+---
+title: "Lab: Reshaping Data"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+# Adapted from Carrie Wright and Ava Hoffman
+---
+
+```{r}
+library(tidyverse)
+```
+
+1.  Read in the public transportation data from Baltimore: Circulator Data, from `data/Charm_City_Circulator_Ridership.csv`\
+    Name the data set `wide`.
+
+```{r, message = FALSE}
+# Can also load from here: wide <- read_csv("http://sisbid.github.io/Data-Wrangling/data/Charm_City_Circulator_Ridership.csv") 
+
+
+```
+
+2.  Reshape to long format using `pivot_longer`. Call this data `long.` Make the `names_to =` `name`, and the values `n_people` Make sure we gather all columns **but** `daily`, `day`, `date`, using the `!`.
+
+```{r}
+
+```
+
+3.  Separate the `date` column into ("month", "day", "year") using `separate()` and `sep = "/"`. Make sure you don't remove the `date` column, call this `long2`. Do a table of the day column. Where did the original `day` column go?
+
+```{r}
+
+```
+
+4.  Notice, there are three types of actions capture per color line: `Board`, `Alight`, and `Average`. Let's run the following create separate columns for route and type. Fill in the missing inputs (where `XXXX` is) to complete the command. Also, notice you can combine multiple mutates in a single mutate call!
+
+```{r, error = TRUE}
+long3 <- long %>%
+  mutate(
+    name = str_replace(name, "Board", "_Board"),
+    name = str_replace(name, XXXX, "_Alight"),
+    XXXX = str_replace(name, "Average", XXXX)
+  ) %>%
+  separate(name, into = c("route", "type"), sep = "_")
+
+```
+
+5.  Reshape `long3` using `pivot_wider()`. Spread the data out so the `route` becomes the new column names and the cells are filled with the `n_people` value. Call this `wide_by_route`.
+
+```{r}
+
+```
+
+5.  Reshape `long3` using `pivot_wider()`. Spread the data out so the `day` becomes the new column names and the cells are filled with the `n_people` value. Call this `wide_by_day`.
+
+```{r}
+
+```

@@ -1,0 +1,151 @@
+---
+title: "HW 1: Cleaning UFO Data"
+output: html_document
+# Elements adapted from Carrie Wright and Ava Hoffman
+---
+
+In this lab you will have more fun with the (messy) UFO sighting data set.
+
+# Cleaning UFO Sightings!
+
+```{r}
+library(tidyverse)
+```
+
+1.  Read in the UFO dataset as an R object called `ufo`. You can read it from: `data/ufo/ufo_data_complete.csv` . You can ignore the "problems" with some rows.
+
+```{r}
+# You can also grab it from here: https://raw.githubusercontent.com/SISBID/Module1/gh-pages/data/ufo/ufo_data_complete.csv
+
+```
+
+### Stringr Exercises
+
+2.  Clean up the column/variable names of the `ufo` dataset to remove spaces and non-alphanumeric characters. You can use the `dplyr::rename()` function or look into the `janitor::clean_names()` function. (Remember you may need to install janitor in addition to tidyverse.)
+
+```{r}
+
+```
+
+3.  How many UFO sightings were reported on a time scale of minutes, specifically using the `duration (hours/min)` originally-named column? (hint: explore the various entries in this column and then use a `stringr` function to match a flexible pattern. you can ignore observations like "1/2 hour" and similar ones that don't contain some version of the word "minutes")
+
+```{r}
+
+```
+
+4.  How accurate is the (formerly-named) `duration (seconds)` column? I.e. how many of the above minutes-scale observations have durations less than 120 seconds or greater than 3800 seconds?
+
+```{r}
+
+```
+
+5.  How many ufo sighting cities end in (a) "field", (b) "ton" and (c) "port"? Hint: See regular expressions to help feed your stringr functions (aka regex)
+
+```{r}
+
+```
+
+6.  How many ufo sighting comments reference the "greys" ?
+
+```{r}
+
+```
+
+7. Which cities did these occur in?
+
+```{r}
+
+```
+
+### Practice with lubridate
+
+8. How many encounters occurred in the year 2010? This question might be tricky to answer until we convert our table columns into something more workable. What would make the `datetime` column format more useful? 
+Create a new column that converts the `datetime` column into a lubridate `<date>` format. Then answer the question.  Call this new column `date_enc`.
+
+
+```{r}
+
+```
+
+
+9. Convert the other "date/time" column `date_posted` to a lubridate formate also. Call this column `date_posted2`
+Hint/note: may need to use "quiet = TRUE" for some of your lubridate conversions to avoid errors.
+
+```{r}
+
+```
+
+9b. Create new separate columns for `year`, `month`, `day`, and `hour`, based on the `date_enc`.
+Hint/note: may need to use "quiet = TRUE" for some of your lubridate conversions to avoid errors.
+
+```{r}
+
+```
+
+(extra credit) 10. Let's take a look at the time it took for these alleged encounters to be reported. Compare the encounter date/time to the posted date.  What is the mean durations between the two?
+Hint: maybe take a look here: https://lubridate.tidyverse.org/reference/time_length.html 
+
+```{r}
+
+```
+
+11.  Can you generate a count summary over the years for the encounters? And over the years posted? (using the counts() function)
+
+```{r}
+
+```
+
+(extra credit) 12. Can you plot in a barplot of the encounter counts ?
+Hint: You might need to remove NAs
+```{r}
+
+```
+
+### Plotting Review Fun
+
+12.  Can you make a scatter plot of all encounters after 2013 occurring in the us?
+
+```{r}
+# Hint: may want to use to reduce clutter/speed up rendering.
+# + theme(axis.text.x=element_blank(),  #remove x axis labels                
+#         axis.ticks.x=element_blank(), #remove x axis ticks          
+#         axis.text.y=element_blank(),  #remove y axis labels           
+#         axis.ticks.y=element_blank()) #remove y axis ticks     )`
+
+
+```
+
+### Practice with Forcats
+
+<https://forcats.tidyverse.org/>
+
+11. What are the most common `shapes` of ufos for the `state` of Texas?  (first try with counts())
+```{r}
+
+```
+
+12. Can you make barplot displaying this information? (this time using forcats)
+
+```{r}
+
+```
+
+13. Can you make the barplot ordered by counts?
+
+```{r}
+
+```
+
+14. This might display too many items for a concise plot. Can you reduce the count categories and replot?
+
+```{r}
+
+```
+
+
+15. What was the most common shape for Texas?  How about Texas in the year 2010?
+
+```{r}
+
+```
+

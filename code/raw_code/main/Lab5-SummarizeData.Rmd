@@ -1,0 +1,53 @@
+---
+title: "Lab: Summarizing Data"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+# Adapted from Carrie Wright and Ava Hoffman
+---
+
+This lab uses public transport data from Baltimore, used in Lab2. The .csv file is located in `data/Charm_City_Circulator_Ridership.csv`
+
+```{r read_in_data}
+library(tidyverse)
+
+
+```
+
+1.  How many days worth of data are in the data set? You can assume each observation/row is a different day
+
+```{r q1}
+
+```
+
+2.  What is the total (sum) number of boardings on the green bus (`greenBoardings`)?
+
+```{r q2}
+
+```
+
+3.  How many days are missing daily ridership? Use `is.na()` and `sum()`.
+
+```{r q3}
+
+```
+
+4.  Group the data by day of the week (`day`) and calculate the sum for riders.
+
+```{r q4}
+
+```
+
+## **Extra practice:**
+
+5.  Describe the distribution of `orangeBoardings`(use `quantile()`). The `quantile()` function works like `mean()`, `sum()`, etc.
+
+```{r q6}
+
+```
+
+6.  Describe the distribution of `orangeBoardings`(use `quantile()`), but this time stratify by day of the week.
+
+```{r q7}
+
+```

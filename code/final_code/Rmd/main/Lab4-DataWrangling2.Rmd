@@ -1,0 +1,60 @@
+---
+title: 'Lab: Data Wrangling Review 2'
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+editor_options:
+  chunk_output_type: console
+---
+
+This lab continues with the mpg dataset (included with ggplot2).
+
+
+```{r, message = FALSE}
+library(dplyr)
+library(tidyverse)
+```
+
+
+1. In the data set `mpg`, rename the column `year` to `YEAR` using `rename`.
+
+```{r}
+mpg <- rename(mpg, YEAR = year)
+```
+
+2. Convert the column names of `mpg` to all upper case. Use `rename_with`, and the `toupper` command (or `colnames`).
+
+```{r}
+mpg <- rename_with(mpg, toupper)
+print(mpg)
+```
+
+
+
+3. Re-order the rows of `mpg` by `CYL` in increasing order. Use `arrange()`. Don't forget to reassign the `mpg` data!
+
+```{r}
+mpg <- arrange(mpg, CYL)  # Reassign the sorted data back to mpg
+```
+
+
+4. Create a new variable in `mpg` called `CTY2`, which  is equal to `CTY^2`, using `mutate()`.  Use piping `%>%`:
+
+```{r}
+mpg <- mpg %>%
+  mutate(CTY2 = CTY^2)
+```
+
+
+5. Create a new variable in `mpg` called `group_class`, which in the `CLASS` variable keeps "pickup" and "suv" as they are, but map "compact", "midsize", "minivan", "subcompact", and "2seater" to "car" using
+`case_when` or `ifelse`, `%in%`, and `mutate`:
+
+```{r}
+mpg <- mpg %>%
+  mutate(group_class = case_when(
+    CLASS %in% c("compact", "midsize", "minivan", "subcompact", "2seater") ~ "car",
+    TRUE ~ as.character(CLASS) 
+  ))
+print(mpg)
+```

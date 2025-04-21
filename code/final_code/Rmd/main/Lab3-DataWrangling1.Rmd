@@ -1,0 +1,96 @@
+---
+title: 'Lab: Data Wrangling Review 1'
+output:
+  pdf_document: default
+editor_options:
+  chunk_output_type: console
+---
+
+This lab will simply use the `mpg` dataset included with ggplot2.
+
+
+```{r, message = FALSE}
+library(tidyverse)
+```
+
+# Part 1
+
+1. Check to see if you have the `mpg` dataset.
+
+```{r}
+data = mpg
+head(mpg)
+```
+
+
+2. What data class is `mpg`?
+```{r}
+class(mpg)
+```
+
+3. How many observations (rows) and variables (columns) are in the `mpg` dataset?
+
+```{r}
+# Install and load necessary package 
+install.packages("ggplot2")
+library(ggplot2)
+
+# Access the mpg dataset
+mpg <- ggplot2::mpg
+# It has 234 rows and 11 columns
+```
+
+4. Select the `manufacturer`, `model` and `year` columns from the `mpg` dataset.
+
+```{r}
+selected_data <- subset(mpg, select = c(manufacturer, model, year))
+# OR
+selected_data <- mpg[, c("manufacturer", "model", "year")]
+View(selected_data)
+```
+
+5. Identify the subset of cars/rows where city fuel economy (`cty`) is greater than 20 and highway fuel economy (`hwy`) is greater than 30. Assign this output to an object called `eff`. How many cars/rows are present?
+
+```{r}
+eff <- subset(mpg, cty > 20 & hwy > 30) 
+   # Or using logical indexing
+eff <- mpg[mpg$cty > 20 & mpg$hwy > 30, ]
+nrow(eff)
+```
+
+6. How many fuel efficient cars (in the `eff` dataset) were manufactured in the year 1999?
+
+```{r}
+eff_1999 <- subset(eff, year == 1999)
+   # Or using logical indexing
+eff_1999 <- eff[eff$year == 1999, ]
+nrow(eff_1999)
+```
+
+7. Filter cars from the overall `mpg` dataset that do not have 4 cylinder engines. How many cars/rows are there?
+
+```{r}
+not_4cyl <- subset(mpg, cyl != 4)
+   # Or using logical indexing
+not_4cyl <- mpg[mpg$cyl != 4, ]
+nrow(not_4cyl)
+```
+
+8. Filter cars to only those in the "suv" or "minivan" class. How many cars/rows are there?
+
+```{r}
+suv_minivan <- subset(mpg, class %in% c("suv", "minivan"))
+   # Or using logical indexing
+suv_minivan <- mpg[mpg$class %in% c("suv", "minivan"), ]
+nrow(suv_minivan)
+```
+
+9. Filter cars with displacements (`displ`) greater than 4 and that are all 4 wheel drive (`drv`) (a value of 4 for `drv`). How many cars/rows are there? 
+
+```{r}
+filtered_cars <- subset(mpg, displ > 4 & drv == "4")
+   # Or using logical indexing
+filtered_cars <- mpg[mpg$displ > 4 & mpg$drv == "4", ]
+nrow(filtered_cars)
+```
+
